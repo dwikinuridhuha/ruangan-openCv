@@ -11,14 +11,15 @@ import numpy as np
 import cv2
 import Person
 import time
+import serial
 
 #Contadores de entrada y salida
 cnt_up   = 0
 cnt_down = 0
 
 #Fuente de video
-#cap = cv2.VideoCapture(0)
-cap = cv2.VideoCapture('sip.mp4')
+cap = cv2.VideoCapture(0)
+# cap = cv2.VideoCapture('sip.mp4')
 
 #Properti video
 ##cap.set(3,160) #Width
