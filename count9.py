@@ -11,13 +11,29 @@ import numpy as np
 import cv2
 import Person
 import time
+# import firebase
 import serial
+
+
+
+
+# fb = firebase.FirebaseApplication('https://count-4dd03.firebaseio.com/')
+
+#inisialisassi komunikasi dengan arduino
+# arduinoUp = serial.Serial('COM?', 9600)
+# arduinoDown = serial.Serial('COM?', 9600)
+arduinoKirim = serial.Serial('COM3', 9600)
+
+def getArduino():
+    arduinoKirim.write(b'Y')
+    arduinData = arduinoKirim.readline().decode('ascii')
+    return arduinData
 
 #Contadores de entrada y salida
 cnt_up   = 0
 cnt_down = 0
 
-#Fuente de video
+# Fuente de video
 cap = cv2.VideoCapture(0)
 # cap = cv2.VideoCapture('sip.mp4')
 
@@ -138,10 +154,14 @@ while(cap.isOpened()):
                         i.updateCoords(cx,cy)   #actualiza coordenadas en el objeto and resets age
                         if i.going_UP(line_down,line_up) == True:
                             cnt_up += 1;
-                            print "ID:",i.getId(),'crossed going up at',time.strftime("%c")
+                            # print "ID:",i.getId(),'crossed going up at',time.strftime("%c")
+                            print "Masuk: ", cnt_up, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%c")
+                            print getArduino()
                         elif i.going_DOWN(line_down,line_up) == True:
                             cnt_down += 1;
-                            print "ID:",i.getId(),'crossed going down at',time.strftime("%c")
+                            # print "ID:",i.getId(),'crossed going down at',time.strftime("%c")
+                            print "Keluar: ", cnt_down, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%c")
+                            print getArduino()
                         break
                     if i.getState() == '1':
                         if i.getDir() == 'down' and i.getY() > down_limit:
@@ -177,7 +197,13 @@ while(cap.isOpened()):
 ##        if i.getId() == 9:
 ##            print str(i.getX()), ',', str(i.getY())
         cv2.putText(frame, str(i.getId()),(i.getX(),i.getY()),font,0.3,i.getRGB(),1,cv2.LINE_AA)
-        
+    ############################
+    #   mnegirim ke Arduino    #
+    ############################
+    # arduinoUp.write(cnt_up)
+    # arduinoDown.write((cnt_down))
+    # arduinoKirim.write(cnt_up)
+
     #################
     #   IMAGANES    #
     #################
@@ -200,7 +226,11 @@ while(cap.isOpened()):
     if k == 27:
         break
 #END while(cap.isOpened())
-    
+
+    #firebase upload
+# fb.put('user', 'masuk', cnt_up)
+# fb.put('user', 'keluar', cnt_down)
+
 #################
 #   LIMPIEZA    #
 #################
