@@ -20,8 +20,6 @@ import serial
 # fb = firebase.FirebaseApplication('https://count-4dd03.firebaseio.com/')
 
 #inisialisassi komunikasi dengan arduino
-# arduinoUp = serial.Serial('COM?', 9600)
-# arduinoDown = serial.Serial('COM?', 9600)
 arduinoKirim = serial.Serial('COM3', 9600)
 
 def getArduino():
@@ -155,12 +153,12 @@ while(cap.isOpened()):
                         if i.going_UP(line_down,line_up) == True:
                             cnt_up += 1;
                             # print "ID:",i.getId(),'crossed going up at',time.strftime("%c")
-                            print "Masuk: ", cnt_up, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%c")
+                            print "Masuk: ", cnt_up, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%a, %d %b %Y"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
                             print getArduino()
                         elif i.going_DOWN(line_down,line_up) == True:
                             cnt_down += 1;
                             # print "ID:",i.getId(),'crossed going down at',time.strftime("%c")
-                            print "Keluar: ", cnt_down, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%c")
+                            print "Keluar: ", cnt_down, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%a, %d %b %Y"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
                             print getArduino()
                         break
                     if i.getState() == '1':
@@ -197,12 +195,6 @@ while(cap.isOpened()):
 ##        if i.getId() == 9:
 ##            print str(i.getX()), ',', str(i.getY())
         cv2.putText(frame, str(i.getId()),(i.getX(),i.getY()),font,0.3,i.getRGB(),1,cv2.LINE_AA)
-    ############################
-    #   mnegirim ke Arduino    #
-    ############################
-    # arduinoUp.write(cnt_up)
-    # arduinoDown.write((cnt_down))
-    # arduinoKirim.write(cnt_up)
 
     #################
     #   IMAGANES    #
@@ -230,6 +222,12 @@ while(cap.isOpened()):
     #firebase upload
 # fb.put('user', 'masuk', cnt_up)
 # fb.put('user', 'keluar', cnt_down)
+# fb.put('user', 'total', cnt_up-cnt_down)
+# fb.put('user', 'tanggal', time.strftime('%c'))
+# fb.put('user', 'suhu', )
+# fb.put('user', 'PIR', )
+
+
 
 #################
 #   LIMPIEZA    #
