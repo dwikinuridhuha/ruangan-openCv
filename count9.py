@@ -11,21 +11,30 @@ import numpy as np
 import cv2
 import Person
 import time
+import sqlite3
 # import firebase
-import serial
-
-
-
+# import serial
 
 # fb = firebase.FirebaseApplication('https://count-4dd03.firebaseio.com/')
 
 #inisialisassi komunikasi dengan arduino
-arduinoKirim = serial.Serial('COM3', 9600)
+# arduinoKirim = serial.Serial('COM3', 9600)
 
-def getArduino():
-    arduinoKirim.write(b'Y')
-    arduinData = arduinoKirim.readline().decode('ascii')
-    return arduinData
+# def tampilArduino():
+#     arduinData = arduinoKirim.readline().decode('ascii')
+#     PIR, suhu = arduinData.split(',')
+#     print "PIR: ", PIR, "\t\tSuhu : ", suhu
+#
+# def ambilArduino(num):
+#     arduinData = arduinoKirim.readline().decode('ascii')
+#     PIR, suhu = arduinData.split(',')
+#     try:
+#         if num == 0:
+#             return PIR
+#         elif num == 1:
+#             return suhu
+#     except:
+#         return "Salah akses"
 
 #Contadores de entrada y salida
 cnt_up   = 0
@@ -151,15 +160,13 @@ while(cap.isOpened()):
                         new = False
                         i.updateCoords(cx,cy)   #actualiza coordenadas en el objeto and resets age
                         if i.going_UP(line_down,line_up) == True:
-                            cnt_up += 1;
-                            # print "ID:",i.getId(),'crossed going up at',time.strftime("%c")
-                            print "Masuk: ", cnt_up, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%a, %d %b %Y"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
-                            print getArduino()
+                            cnt_up += 1
+                            print "Masuk: ", cnt_up, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%A, %d %B %Y"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
+                            # tampilArduino()
                         elif i.going_DOWN(line_down,line_up) == True:
-                            cnt_down += 1;
-                            # print "ID:",i.getId(),'crossed going down at',time.strftime("%c")
-                            print "Keluar: ", cnt_down, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%a, %d %b %Y"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
-                            print getArduino()
+                            cnt_down += 1
+                            print "Keluar: ", cnt_down, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%A, %d %B %Y"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
+                            # tampilArduino()
                         break
                     if i.getState() == '1':
                         if i.getDir() == 'down' and i.getY() > down_limit:
@@ -179,8 +186,7 @@ while(cap.isOpened()):
             #   DIBUJOS     #
             #################
             cv2.circle(frame,(cx,cy), 5, (0,0,255), -1)
-            img = cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)            
-            #cv2.drawContours(frame, cnt, -1, (0,255,0), 3)
+            img = cv2.rectangle(frame,(x,y),(x+w,y+h),(0,255,0),2)
             
     #END for cnt in contours0
             
@@ -188,12 +194,6 @@ while(cap.isOpened()):
     # DIBUJAR TRAYECTORIAS  #
     #########################
     for i in persons:
-##        if len(i.getTracks()) >= 2:
-##            pts = np.array(i.getTracks(), np.int32)
-##            pts = pts.reshape((-1,1,2))
-##            frame = cv2.polylines(frame,[pts],False,i.getRGB())
-##        if i.getId() == 9:
-##            print str(i.getX()), ',', str(i.getY())
         cv2.putText(frame, str(i.getId()),(i.getX(),i.getY()),font,0.3,i.getRGB(),1,cv2.LINE_AA)
 
     #################
@@ -211,8 +211,22 @@ while(cap.isOpened()):
     cv2.putText(frame, str_down ,(10,90),font,0.5,(255,0,0),1,cv2.LINE_AA)
 
     cv2.imshow('Frame',frame)
-    #cv2.imshow('Mask',mask)    
-    
+    #cv2.imshow('Mask',mask)
+
+        #firebase upload
+    # fb.put('user', 'masuk', cnt_up)
+    # fb.put('user', 'keluar', cnt_down)
+    # fb.put('user', 'total', cnt_up-cnt_down)
+    # fb.put('user', 'hari', time.strftime('%A'))
+    # fb.put('user', 'tanggal', time.strftime('%d'))
+    # fb.put('user', 'bulan', time.strftime('%B'))
+    # fb.put('user', 'tahun', time.strftime('%Y'))
+    # fb.put('user', 'jam', time.strftime('%H'))
+    # fb.put('user', 'menit', time.strftime('%M'))
+    # fb.put('user', 'detik', time.strftime('%S'))
+    # fb.put('user', 'suhu', ambilArduino(0))
+    # fb.put('user', 'PIR', ambilArduino(1))
+
     #preisonar ESC para salir
     k = cv2.waitKey(30) & 0xff
     if k == 27:
@@ -223,11 +237,15 @@ while(cap.isOpened()):
 # fb.put('user', 'masuk', cnt_up)
 # fb.put('user', 'keluar', cnt_down)
 # fb.put('user', 'total', cnt_up-cnt_down)
-# fb.put('user', 'tanggal', time.strftime('%c'))
-# fb.put('user', 'suhu', )
-# fb.put('user', 'PIR', )
-
-
+# fb.put('user', 'hari', time.strftime('%A'))
+# fb.put('user', 'tanggal', time.strftime('%d'))
+# fb.put('user', 'bulan', time.strftime('%B'))
+# fb.put('user', 'tahun', time.strftime('%Y'))
+# fb.put('user', 'jam', time.strftime('%H'))
+# fb.put('user', 'menit', time.strftime('%M'))
+# fb.put('user', 'detik', time.strftime('%S'))
+# fb.put('user', 'suhu', ambilArduino(0))
+# fb.put('user', 'PIR', ambilArduino(1))
 
 #################
 #   LIMPIEZA    #
