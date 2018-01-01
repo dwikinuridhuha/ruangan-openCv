@@ -15,6 +15,15 @@ import sqlite3
 # import firebase
 # import serial
 
+# koneksi dengan sqlite
+def insertSQLite(masuk, keluar):
+    konek = sqlite3.connect("count.db")
+    query = "INSERT INTO hitung(Masuk, Keluar) Values("+str(masuk)+","+str(keluar)+")"
+    konek.execute(query)
+    konek.commit()
+    konek.close()
+
+
 # fb = firebase.FirebaseApplication('https://count-4dd03.firebaseio.com/')
 
 #inisialisassi komunikasi dengan arduino
@@ -163,10 +172,12 @@ while(cap.isOpened()):
                             cnt_up += 1
                             print "Masuk: ", cnt_up, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%A, %d %B %Y"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
                             # tampilArduino()
+                            insertSQLite(cnt_up, cnt_down)
                         elif i.going_DOWN(line_down,line_up) == True:
                             cnt_down += 1
                             print "Keluar: ", cnt_down, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%A, %d %B %Y"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
                             # tampilArduino()
+                            insertSQLite(cnt_up, cnt_down)
                         break
                     if i.getState() == '1':
                         if i.getDir() == 'down' and i.getY() > down_limit:
