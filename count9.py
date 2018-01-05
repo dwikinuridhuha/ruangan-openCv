@@ -12,14 +12,24 @@ import cv2
 import Person
 import time
 import sqlite3
+import MySQLdb
 # import firebase
 # import serial
 
 # koneksi dengan sqlite
 def insertSQLite(masuk, keluar):
     konek = sqlite3.connect("count.db")
-    query = "INSERT INTO hitung(Masuk, Keluar) Values("+str(masuk)+","+str(keluar)+")"
+    query = "INSERT INTO hitung(Masuk, Keluar, tanggal, waktu) Values("+str(masuk)+","+str(keluar)+","+str(time.strftime("%Y-%m-%d"))+","+time.strftime("%H:%M:%S")+")"
     konek.execute(query)
+    #mySql
+    konek.commit()
+    konek.close()
+
+def insertMySql(masuk, keluar):
+    konek = MySQLdb.connect(db="count", user="root")
+    x = konek.cursor()
+    query = "INSERT INTO hitung(masuk, keluar, tanggal, waktu) Values("+str(masuk)+","+str(keluar)+",""NOW()"",""NOW()"")"
+    x.execute(query)
     konek.commit()
     konek.close()
 
@@ -50,8 +60,8 @@ cnt_up   = 0
 cnt_down = 0
 
 # Fuente de video
-cap = cv2.VideoCapture(0)
-# cap = cv2.VideoCapture('sip.mp4')
+# cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture('sip.mp4')
 
 #Properti video
 ##cap.set(3,160) #Width
@@ -170,14 +180,16 @@ while(cap.isOpened()):
                         i.updateCoords(cx,cy)   #actualiza coordenadas en el objeto and resets age
                         if i.going_UP(line_down,line_up) == True:
                             cnt_up += 1
-                            print "Masuk: ", cnt_up, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%A, %d %B %Y"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
+                            print "Masuk: ", cnt_up, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%Y-%m-%d"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
                             # tampilArduino()
-                            insertSQLite(cnt_up, cnt_down)
+                            # insertSQLite(cnt_up, cnt_down)
+                            insertMySql(cnt_up, cnt_down)
                         elif i.going_DOWN(line_down,line_up) == True:
                             cnt_down += 1
-                            print "Keluar: ", cnt_down, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%A, %d %B %Y"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
+                            print "Masuk: ", cnt_up, "\t|\tTotal di ruangan: ", cnt_up-cnt_down, "\t|\tPada tanggal :", time.strftime("%Y-%m-%d"), "\t|\tPada Jam :", time.strftime("%H:%M:%S")
                             # tampilArduino()
-                            insertSQLite(cnt_up, cnt_down)
+                            # insertSQLite(cnt_up, cnt_down)
+                            insertMySql(cnt_up, cnt_down)
                         break
                     if i.getState() == '1':
                         if i.getDir() == 'down' and i.getY() > down_limit:
