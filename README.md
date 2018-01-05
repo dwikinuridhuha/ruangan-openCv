@@ -7,3 +7,7 @@ numpy, cv2, Person, time, MySQLdb, & serial
 # software yang di perlukan
 server lokal: xampp, wamp, lampp, dll
 IDE python: pycharm, jupyter, spyder, idea, dll
+
+# python & openCv version
+python 2.7
+openCv 2
